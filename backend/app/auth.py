@@ -43,11 +43,14 @@ def create_access_token(data: dict, expires_minutes: int = settings.ACCESS_TOKEN
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
-def get_current_user(db: Session = Depends(get_db)) -> models.User:
+def get_current_user(
+    token: str = Depends(oauth2_scheme),   # <-- use OAuth2 here
+    db: Session = Depends(get_db),
+) -> models.User:
     """
     Simplified for assignment:
-    - Always returns the first user in the database.
-    - Ignores the JWT token completely.
+    - We accept a Bearer token (so Swagger shows Authorize),
+    - but still just return the first user from the database.
     """
     user = db.query(models.User).first()
     if not user:
@@ -56,3 +59,4 @@ def get_current_user(db: Session = Depends(get_db)) -> models.User:
             detail="No users found in database",
         )
     return user
+
