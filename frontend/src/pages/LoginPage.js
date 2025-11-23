@@ -13,19 +13,25 @@ function LoginPage({ onLogin }) {
 
     try {
       const formData = new URLSearchParams();
-formData.append("username", email);
-formData.append("password", password);
-formData.append("grant_type", "password"); // 🔴 ADD THIS LINE
+      formData.append("username", email);
+      formData.append("password", password);
+      formData.append("grant_type", "password"); // REQUIRED for OAuth2PasswordRequestForm
 
-const res = await api.post("/auth/login", formData, {
-  headers: { "Content-Type": "application/x-www-form-urlencoded" },
-});
+      const res = await api.post("/auth/login", formData, {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      });
 
+      const token = res.data.access_token;
 
-      const token = res.data.access_token || "dummy-token";
+      if (!token) {
+        setError("Invalid token received");
+        return;
+      }
+
+      // Save token + notify App.js
       onLogin(token);
     } catch (err) {
-      console.error(err);
+      console.error("Login error:", err);
       setError("Login failed. Check your email/password.");
     }
   };

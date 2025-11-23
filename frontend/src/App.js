@@ -1,26 +1,18 @@
-import React, { useEffect, useState } from "react";
+// src/App.js
+import React, { useState } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDetailPage from "./pages/ProjectDetailPage";
-import { setAuthToken } from "./api/axiosClient";
 import RefinePage from "./pages/RefinePage";
-
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (token) {
-      setAuthToken(token);
-    } else {
-      setAuthToken(null);
-    }
-  }, [token]);
-
   const handleLogin = (newToken) => {
+    // store token for axios interceptor + reloads
     localStorage.setItem("token", newToken);
     setToken(newToken);
     navigate("/projects");
@@ -91,7 +83,6 @@ function App() {
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/projects/:id" element={<ProjectDetailPage />} />
           <Route path="/refine" element={<RefinePage />} />
-
         </Routes>
       </main>
     </div>

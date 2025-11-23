@@ -4,14 +4,13 @@ const api = axios.create({
   baseURL: "http://127.0.0.1:8000",
 });
 
-export function setAuthToken(token) {
+api.interceptors.request.use((config) => {
+  // 👇 This key must match LoginPage
+  const token = localStorage.getItem("access_token");
   if (token) {
-    // ✅ use the REAL token here
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-  } else {
-    // remove header when logged out
-    delete api.defaults.headers.common["Authorization"];
+    config.headers.Authorization = `Bearer ${token}`;
   }
-}
+  return config;
+});
 
 export default api;

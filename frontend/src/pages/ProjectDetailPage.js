@@ -1,7 +1,7 @@
 // src/pages/ProjectDetailPage.js
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import api from "../api/axiosClient";
+import axiosClient from "../api/axiosClient";
 import SectionCard from "../components/SectionCard";
 
 function ProjectDetailPage() {
@@ -11,7 +11,7 @@ function ProjectDetailPage() {
 
   const fetchProject = async () => {
     try {
-      const res = await api.get(`/projects/${id}`);
+      const res = await axiosClient.get(`/projects/${id}`);
       setProject(res.data);
     } catch (err) {
       console.error("Error fetching project", err);
@@ -27,7 +27,7 @@ function ProjectDetailPage() {
 
   const handleRefine = async (sectionId, prompt) => {
     try {
-      await api.post(`/sections/${sectionId}/refine`, { prompt });
+      await axiosClient.post(`/sections/${sectionId}/refine`, { prompt });
       await fetchProject();
     } catch (err) {
       console.error("Refine error", err);
@@ -36,7 +36,9 @@ function ProjectDetailPage() {
 
   const handleFeedback = async (sectionId, isLike) => {
     try {
-      await api.post(`/sections/${sectionId}/feedback`, { is_like: isLike });
+      await axiosClient.post(`/sections/${sectionId}/feedback`, {
+        is_like: isLike,
+      });
     } catch (err) {
       console.error("Feedback error", err);
     }
@@ -44,19 +46,53 @@ function ProjectDetailPage() {
 
   const handleAddComment = async (sectionId, text) => {
     try {
-      await api.post(`/sections/${sectionId}/comments`, { text });
+      await axiosClient.post(`/sections/${sectionId}/comments`, { text });
       await fetchProject();
     } catch (err) {
       console.error("Comment error", err);
     }
   };
 
-  const handleExportDocx = () => {
-    window.location.href = `http://127.0.0.1:8000/export/docx/${id}`;
+  const handleExportDocx = async () => {
+    try {
+      const res = await axiosClient.get(`/export/docx/${id}`, {
+        responseType: "blob",
+      });
+
+      const blob = new Blob([res.data]);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${project?.name || "project"}-${id}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("DOCX export error", err);
+      alert("Failed to export DOCX");
+    }
   };
 
-  const handleExportPptx = () => {
-    window.location.href = `http://127.0.0.1:8000/export/pptx/${id}`;
+  const handleExportPptx = async () => {
+    try {
+      const res = await axiosClient.get(`/export/pptx/${id}`, {
+        responseType: "blob",
+      });
+
+      const blob = new Blob([res.data]);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${project?.name || "project"}-${id}.pptx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("PPTX export error", err);
+      alert("Failed to export PPTX");
+    }
   };
 
   if (loading) return <div style={{ color: "white" }}>Loading project...</div>;

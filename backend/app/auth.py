@@ -4,12 +4,13 @@ from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 import hashlib
+from typing import Optional
 
 from .config import settings
 from .database import SessionLocal
 from . import models
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login", auto_error=False)
 
 
 def get_db():
@@ -44,13 +45,14 @@ def create_access_token(data: dict, expires_minutes: int = settings.ACCESS_TOKEN
 
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme),   # <-- use OAuth2 here
+    token: Optional[str] = Depends(oauth2_scheme),  # token can be None now
     db: Session = Depends(get_db),
 ) -> models.User:
     """
     Simplified for assignment:
-    - We accept a Bearer token (so Swagger shows Authorize),
-    - but still just return the first user from the database.
+    - Accepts a Bearer token if present (so Swagger shows Authorize),
+    - But does NOT strictly require it for now.
+    - Always returns the first user in the database.
     """
     user = db.query(models.User).first()
     if not user:
@@ -59,4 +61,3 @@ def get_current_user(
             detail="No users found in database",
         )
     return user
-
