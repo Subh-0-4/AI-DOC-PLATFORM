@@ -1,12 +1,23 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Settings(BaseSettings):
-    SECRET_KEY: str = "supersecret"
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
+    # JWT / auth settings
+    secret_key: str = "supersecret"
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 60
+
+    # Database
     DATABASE_URL: str = "sqlite:///./app.db"
 
-    class Config:
-        env_file = ".env"
+    # Gemini LLM
+    gemini_api_key: str | None = None  # <-- IMPORTANT
+
+    # Tell pydantic to load from .env, and ignore extra env vars instead of crashing
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="ignore",
+    )
+
 
 settings = Settings()
