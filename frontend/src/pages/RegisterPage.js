@@ -1,3 +1,4 @@
+// frontend/src/pages/RegisterPage.js
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axiosClient";
@@ -5,24 +6,28 @@ import api from "../api/axiosClient";
 function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMsg("");
     setError("");
+    setLoading(true);
 
     try {
-      await api.post("/auth/register", { email, password });
-      setMsg("Registration successful. Redirecting to login...");
-      setTimeout(() => navigate("/login"), 1200);
+      await api.post("/auth/register", {
+        email,
+        password,
+      });
+
+      // after successful registration, go to login
+      navigate("/login");
     } catch (err) {
       console.error(err);
-      setError(
-        err.response?.data?.detail || "Registration failed. Try another email."
-      );
+      setError("Registration failed. Try a different email or check the backend.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,9 +49,9 @@ function RegisterPage() {
           padding: "28px 24px 24px",
         }}
       >
-        <h2 style={{ marginBottom: "8px" }}>Create an account</h2>
+        <h2 style={{ marginBottom: "8px" }}>Create your account</h2>
         <p style={{ margin: 0, color: "#6b7280", fontSize: "0.9rem" }}>
-          Sign up to start generating Word and PowerPoint documents.
+          Sign up to start generating AI-powered documents.
         </p>
 
         <form onSubmit={handleSubmit} style={{ marginTop: "20px" }}>
@@ -103,26 +108,16 @@ function RegisterPage() {
               {error}
             </div>
           )}
-          {msg && (
-            <div
-              style={{
-                marginTop: "10px",
-                color: "#15803d",
-                fontSize: "0.85rem",
-              }}
-            >
-              {msg}
-            </div>
-          )}
 
           <button
             type="submit"
+            disabled={loading}
             style={{
               marginTop: "18px",
               width: "100%",
               padding: "10px",
               background:
-                "linear-gradient(to right,#22c55e,#16a34a,#15803d)",
+                "linear-gradient(to right,#2563eb,#4f46e5,#7c3aed)",
               color: "white",
               border: "none",
               borderRadius: "999px",
@@ -131,7 +126,7 @@ function RegisterPage() {
               letterSpacing: "0.03em",
             }}
           >
-            Sign up
+            {loading ? "Creating account..." : "Sign up"}
           </button>
         </form>
 
@@ -145,7 +140,7 @@ function RegisterPage() {
         >
           Already have an account?{" "}
           <Link to="/login" style={{ color: "#2563eb" }}>
-            Login
+            Sign in
           </Link>
         </p>
       </div>
